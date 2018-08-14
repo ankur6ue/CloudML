@@ -1,0 +1,3 @@
+Alias /asp_viz/ "/opt/bitnami/apps/asp_viz/htdocs/"
+Alias /asp_viz "/opt/bitnami/apps/asp_viz/htdocs/"
+Include "/opt/bitnami/apps/asp_viz/conf/httpd-app.conf"

@@ -63,15 +63,15 @@ function postFile(file) {
     let formdata = new FormData();
     formdata.append("image", file);
     formdata.append("threshold", scoreThreshold);
-	apiServer = "http://www.telesens.co/obj_detect_impl/detect"
+	apiServer = "https://www.telesens.co/obj_detect_impl/detect"
     let xhr = new XMLHttpRequest();
     xhr.open('POST', apiServer, true);
     xhr.onload = function () {
         if (this.status === 200) {
-            let objects = JSON.parse(this.response);
+            let object_data = JSON.parse(this.response);
 
             //draw the boxes
-            drawBoxes(objects);
+            drawBoxes(object_data.objects);
 
             //Save and send the next image
             imageCtx.drawImage(v, 0, 0, v.videoWidth, v.videoHeight, 0, 0, ovWidth, ovHeight );
@@ -89,7 +89,7 @@ function postFile(file) {
 function startObjectDetection() {
 
     console.log("starting object detection");
-	apiServer = "http://www.telesens.co/obj_detect_impl/init"
+	apiServer = "https://www.telesens.co/obj_detect_impl/init"
     
     //Set canvas sizes base don input video
     drawCanvas.width = v.videoWidth;
@@ -132,7 +132,7 @@ v.onplaying = () => {
     console.log("video playing");
     isPlaying = true;
     if (gotMetadata) {
-    //    startObjectDetection();
+        startObjectDetection();
     }
 };
 

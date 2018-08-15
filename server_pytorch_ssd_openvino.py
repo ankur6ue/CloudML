@@ -5,6 +5,7 @@ import argparse
 import cv2
 import time
 import numpy as np
+import psutil
 from flask import Flask, request, Response, jsonify
 from openvino.inference_engine import IENetwork, IEPlugin
 from threading import Thread
@@ -70,7 +71,10 @@ def detect():
         res = exec_net.infer(inputs={input_blob: image})
         end = time.time()
         time_elapsed = end - start
+        proc = psutil.Process()
         result = {}
+        object_data = {}
+        object_data["processing_time"] = time_elapsed
         objects = []
         bbox_data = res[out_blob][0][0]
         
@@ -90,7 +94,8 @@ def detect():
                     object['height'] = float(pt[3] - pt[1])
                     objects.append(object)
 
-        return jsonify(objects)
+        object_data["objects"] = objects
+        return jsonify(object_data)
 
 
     except Exception as e:
@@ -100,10 +105,10 @@ def detect():
 def setup_openvino():
     app.logger.info('in setup_openvino')
     args = {}
-    args['model'] = '/opt/intel/computer_vision_sdk/deployment_tools/intel_models/person-detection-retail-0013/FP32/person-detection-retail-0013.xml'
-    args['device'] = 'CPU'
-    args['cpu_extension'] = 'opt/intel/computer_vision_sdk/deployment_tools/inference_engine/lib/ubuntu_16.04/intel64/libcpu_extension_sse4.so'
-    args['plugin_dir'] = None
+    args['model'] = app.config['model']
+    args['device'] = app.config['device']
+    args['cpu_extension'] = app.config['cpu_extension']
+    args['plugin_dir'] = app.config['plugin_dir']
     
     app.logger.info("Using model: {}".format(args['model']))
     model_xml = args['model']
@@ -154,7 +159,7 @@ def init():
 if __name__ == '__main__':
     
     # without SSL
-    app.run(host='0.0.0.0', port=5000)
+    #app.run(host='0.0.0.0', port=5000)
 
     # with SSL
-    #app.run(debug=True, host='0.0.0.0', ssl_context=('ssl/server.crt', 'ssl/server.key'))
+    app.run(debug=True, host='0.0.0.0', ssl_context=('/opt/bitnami/apache2/conf/server.crt', '/opt/bitnami/apache2/conf/server.key'))
